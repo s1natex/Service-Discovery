@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  consul:
+    image: consul:1.15
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    command: "agent -dev -client=0.0.0.0"
+    networks:
+      - app-network
+
+  service-a:
+    build:
+      context: ./service
+    environment:
+      - SERVICE_NAME=service-a
+      - SERVICE_PORT=5000
+    networks:
+      - app-network
+    depends_on:
+      - consul
+
+  service-b:
+    build:
+      context: ./service
+    environment:
+      - SERVICE_NAME=service-b
+      - SERVICE_PORT=5000
+    networks:
+      - app-network
+    depends_on:
+      - consul
+
+  service-c:
+    build:
+      context: ./service
+    environment:
+      - SERVICE_NAME=service-c
+      - SERVICE_PORT=5000
+    networks:
+      - app-network
+    depends_on:
+      - consul
+
+  gateway:
+    build:
+      context: ./gateway
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+    depends_on:
+      - consul
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    depends_on:
+      - gateway
+
+networks:
+  app-network:
