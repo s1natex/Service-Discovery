@@ -55,4 +55,3 @@ docker stop <service>
 # Check Frontend responding
 docker start <service>
 # Check Frontend responding
-```
