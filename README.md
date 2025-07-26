@@ -6,7 +6,6 @@ A service discovery Project with 3 dummy services using Consul displayed with a 
 ```
 service-discovery/
 ├── docker-compose.yml
-├── consul/               # (optional configs)
 ├── gateway/              # API Gateway (Python + Flask)
 ├── service/              # Dummy service template (A, B, C)
 ├── frontend/             # React app (Vite + Nginx)
