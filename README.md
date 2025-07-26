@@ -39,9 +39,10 @@ docker-compose up --build
 # Wait until all services are up watch the logs
 Registered with Consul: 200
  * Running on http://0.0.0.0:5000
+ * no errors GET returning 200
 
 # Check Consul UI if all services are listed and healthy
-Open http://localhost:8500
+http://localhost:8500
 
 # Test API Gateway curl or use browser and get 3 json service objects
 http://localhost:8000/services
@@ -57,3 +58,4 @@ docker stop <service>
 docker start <service>
 # Wait a few seconds
 # Check Frontend responding
+docker-compose down
