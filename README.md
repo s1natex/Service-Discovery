@@ -37,9 +37,6 @@ docker-compose up --build
 docker-compose up --build
 
 # Wait until all services are up watch the logs
-Registered with Consul: 200
- * Running on http://0.0.0.0:5000
-
 # Check Consul UI if all services are listed and healthy
 Open http://localhost:8500
 
