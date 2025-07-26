@@ -52,6 +52,7 @@ http://localhost:3000
 # Service Failure Simulation
 docker ps  # get service name
 docker stop <service>
+# Wait 
 # Check Frontend responding
 docker start <service>
 # Check Frontend responding

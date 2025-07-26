@@ -16,7 +16,7 @@ function App() {
           const name = svc.service
           const start = performance.now()
           try {
-            const res = await axios.get(`/api/service/${name}`)
+            const res = await axios.get(`/api/service/${name}`, { timeout: 1000 })
             const end = performance.now()
             const baseTime = new Date(res.data.timestamp).getTime()
 
@@ -30,17 +30,16 @@ function App() {
           } catch (err) {
             return {
               service: name,
+              status: 'offline',
               timestamp: 'N/A',
               host: 'N/A',
               baseTimestamp: null,
               fetchedAt: null,
-              status: 'offline',
               responseTime: null
             }
           }
         })
       )
-
       setServices(updated)
     }
 

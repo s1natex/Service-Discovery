@@ -28,7 +28,9 @@ def register_with_consul():
         "Port": SERVICE_PORT,
         "Check": {
             "HTTP": f"http://{socket.gethostname()}:{SERVICE_PORT}/info",
-            "Interval": "10s"
+            "Interval": "5s",
+            "Timeout": "2s",
+            "DeregisterCriticalServiceAfter": "10s"
         }
     }
     try:

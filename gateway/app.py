@@ -1,28 +1,53 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
 import requests
-import os
 
 app = Flask(__name__)
 
 CONSUL_URL = "http://consul:8500/v1/catalog/service/"
+SERVICE_NAMES = ["service-a", "service-b", "service-c"]
 
 @app.route("/services", methods=["GET"])
 def list_services():
-    service_names = ["service-a", "service-b", "service-c"]
     results = []
 
-    for name in service_names:
+    for name in SERVICE_NAMES:
         try:
-            res = requests.get(f"{CONSUL_URL}{name}")
+            res = requests.get(f"{CONSUL_URL}{name}", timeout=1)
             data = res.json()
             if data:
-                service_info = data[0]
-                address = service_info["ServiceAddress"] or service_info["Address"]
-                port = service_info["ServicePort"]
-                info_res = requests.get(f"http://{address}:{port}/info", timeout=2)
-                results.append(info_res.json())
-        except Exception as e:
-            results.append({"service": name, "error": str(e)})
+                service = data[0]
+                address = service["ServiceAddress"] or service["Address"]
+                port = service["ServicePort"]
+
+                try:
+                    info = requests.get(f"http://{address}:{port}/info", timeout=1)
+                    svc_data = info.json()
+                    svc_data["status"] = "online"
+                    results.append(svc_data)
+                except:
+                    results.append({
+                        "service": name,
+                        "status": "offline",
+                        "timestamp": "N/A",
+                        "host": "N/A",
+                        "responseTime": None
+                    })
+            else:
+                results.append({
+                    "service": name,
+                    "status": "offline",
+                    "timestamp": "N/A",
+                    "host": "N/A",
+                    "responseTime": None
+                })
+        except:
+            results.append({
+                "service": name,
+                "status": "offline",
+                "timestamp": "N/A",
+                "host": "N/A",
+                "responseTime": None
+            })
 
     return jsonify(results)
 
@@ -30,17 +55,22 @@ def list_services():
 @app.route("/service/<name>", methods=["GET"])
 def proxy_to_service(name):
     try:
-        res = requests.get(f"{CONSUL_URL}{name}")
+        res = requests.get(f"{CONSUL_URL}{name}", timeout=1)
         data = res.json()
         if data:
             service = data[0]
             address = service["ServiceAddress"] or service["Address"]
             port = service["ServicePort"]
-            info = requests.get(f"http://{address}:{port}/info")
+            info = requests.get(f"http://{address}:{port}/info", timeout=1)
             return jsonify(info.json())
-        return jsonify({"error": "Service not found"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except:
+        pass
+    return jsonify({
+        "service": name,
+        "status": "offline",
+        "timestamp": "N/A",
+        "host": "N/A"
+    }), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000)
