@@ -2,7 +2,7 @@ from flask import Flask, jsonify
 import os
 import socket
 import requests
-import time
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -15,7 +15,7 @@ CONSUL_PORT = 8500
 def info():
     return jsonify({
         "service": SERVICE_NAME,
-        "timestamp": time.strftime('%Y-%m-%d %H:%M:%S'),
+        "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],
         "host": socket.gethostname()
     })
 
