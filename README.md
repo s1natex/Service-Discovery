@@ -55,7 +55,9 @@ docker ps  # get service name
 docker stop <service>
 # Wait a few seconds
 # Check Frontend responding
+
 docker start <service>
 # Wait a few seconds
 # Check Frontend responding
+
 docker-compose down
