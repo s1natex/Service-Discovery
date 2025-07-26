@@ -37,6 +37,9 @@ docker-compose up --build
 docker-compose up --build
 
 # Wait until all services are up watch the logs
+Registered with Consul: 200
+ * Running on http://0.0.0.0:5000
+
 # Check Consul UI if all services are listed and healthy
 Open http://localhost:8500
 
@@ -47,8 +50,9 @@ http://localhost:8000/services
 http://localhost:3000
 
 # Service Failure Simulation
-docker stop service-b
-# check Frontend responding
-docker start service-b
-# check Frontend responding
+docker ps  # get service name
+docker stop <service>
+# Check Frontend responding
+docker start <service>
+# Check Frontend responding
 ```
