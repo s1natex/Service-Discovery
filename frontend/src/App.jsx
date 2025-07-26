@@ -2,41 +2,44 @@ import { useEffect, useState } from 'react'
 import axios from 'axios'
 
 function App() {
-  const [services, setServices] = useState([])
+  const [services, setServices] = useState([
+    { service: 'service-a' },
+    { service: 'service-b' },
+    { service: 'service-c' }
+  ])
   const [now, setNow] = useState(Date.now())
 
   useEffect(() => {
     const fetchServices = async () => {
-      const serviceNames = ['service-a', 'service-b', 'service-c']
-      const updated = []
+      const updated = await Promise.all(
+        services.map(async (svc) => {
+          const name = svc.service
+          const start = performance.now()
+          try {
+            const res = await axios.get(`/api/service/${name}`)
+            const end = performance.now()
+            const baseTime = new Date(res.data.timestamp).getTime()
 
-      for (const name of serviceNames) {
-        const start = performance.now()
-        try {
-          const res = await axios.get(`/api/service/${name}`)
-          const end = performance.now()
-
-          const baseTime = new Date(res.data.timestamp).getTime()
-
-          updated.push({
-            ...res.data,
-            baseTimestamp: baseTime,
-            fetchedAt: Date.now(),
-            status: 'online',
-            responseTime: Math.round(end - start)
-          })
-        } catch (err) {
-          updated.push({
-            service: name,
-            timestamp: 'N/A',
-            host: 'N/A',
-            baseTimestamp: null,
-            fetchedAt: null,
-            status: 'offline',
-            responseTime: null
-          })
-        }
-      }
+            return {
+              ...res.data,
+              baseTimestamp: baseTime,
+              fetchedAt: Date.now(),
+              status: 'online',
+              responseTime: Math.round(end - start)
+            }
+          } catch (err) {
+            return {
+              service: name,
+              timestamp: 'N/A',
+              host: 'N/A',
+              baseTimestamp: null,
+              fetchedAt: null,
+              status: 'offline',
+              responseTime: null
+            }
+          }
+        })
+      )
 
       setServices(updated)
     }
@@ -55,7 +58,7 @@ function App() {
     if (!base || !fetched) return 'N/A'
     const offset = now - fetched
     const displayTime = new Date(base + offset)
-    return displayTime.toISOString().replace('T', ' ').slice(0, -1) // trim trailing "Z"
+    return displayTime.toISOString().replace('T', ' ').slice(0, -1)
   }
 
   return (
@@ -72,12 +75,12 @@ function App() {
                   backgroundColor: svc.status === 'online' ? '#28a745' : '#dc3545'
                 }}
               >
-                {svc.status.toUpperCase()}
+                {svc.status?.toUpperCase() || 'UNKNOWN'}
               </span>
             </div>
             <p><strong>Timestamp:</strong><br />{formatTimestamp(svc.baseTimestamp, svc.fetchedAt)}</p>
             <p><strong>Response Time:</strong> {svc.responseTime !== null ? `${svc.responseTime} ms` : 'N/A'}</p>
-            <p style={styles.host}>🖥️ {svc.host}</p>
+            <p style={styles.host}>🖥️ {svc.host || 'N/A'}</p>
           </div>
         ))}
       </div>

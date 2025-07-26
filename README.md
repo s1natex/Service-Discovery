@@ -6,7 +6,6 @@ A service discovery Project with 3 dummy services using Consul displayed with a 
 ```
 service-discovery/
 ├── docker-compose.yml
-├── consul/               # (optional configs)
 ├── gateway/              # API Gateway (Python + Flask)
 ├── service/              # Dummy service template (A, B, C)
 ├── frontend/             # React app (Vite + Nginx)
@@ -51,8 +50,9 @@ http://localhost:8000/services
 http://localhost:3000
 
 # Service Failure Simulation
-docker stop service-b
-# check Frontend responding
-docker start service-b
-# check Frontend responding
+docker ps  # get service name
+docker stop <service>
+# Check Frontend responding
+docker start <service>
+# Check Frontend responding
 ```
