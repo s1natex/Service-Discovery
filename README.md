@@ -63,9 +63,6 @@ docker start <service>
 docker-compose down
 ```
 ## Screenshots:
-### Consul dashboard
-[Consul dashboard](media/consul-nodes.png)
-### Frontend
-[Frontend](media/frontend.png)
-### Service Endpoint
-[Service Endpoint](media/service-endpoint.png)
+![Consul dashboard](media/consul-nodes.png)
+![Frontend](media/frontend.png)
+![Service Endpoint](media/service-endpoint.png)
