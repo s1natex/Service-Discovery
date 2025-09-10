@@ -1,5 +1,5 @@
 # Service Discovery Demo Project
-A service discovery Project with dummy services registering with Consul and an api that connects consul discovery to a frontend dashboard service
+A service discovery Project with dummy services registering with Consul and an api that connects consul discovery to a frontend dashboard service, can be deployed using Docker compose or Kubernetes
 ## [Project Page](https://roadmap.sh/projects/service-discovery)
 ![Diagram](Diagram.drawio.png)
 ## Project Overview
@@ -12,6 +12,15 @@ service-discovery/
 ```
 ### Prerequisites:
 - Docker & Docker Compose
+- Kubernetes
+- Run Pre commit deps:
+```
+pip install pre-commit
+pre-commit install
+
+# for baseline run once
+pre-commit run --all-files
+```
 ### Run the project
 ```
 docker-compose up --build

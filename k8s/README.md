@@ -1,4 +1,5 @@
 ## Kubernetes Deployment
+### This is a local k8s deployment thus port forwarding is needed for now*
 ```
 # 1) Build images
 docker build -t service-discovery-service:latest ./service
