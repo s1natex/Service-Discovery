@@ -1,15 +1,20 @@
 from flask import Flask, jsonify
-import os
-import socket
-import requests
+import os, socket, time, threading, requests
 from datetime import datetime
 
 app = Flask(__name__)
 
 SERVICE_NAME = os.getenv("SERVICE_NAME", "default-service")
-SERVICE_PORT = int(os.getenv("SERVICE_PORT", 5000))
+SERVICE_PORT = int(os.getenv("SERVICE_PORT", "5000"))
 CONSUL_HOST = os.getenv("CONSUL_HOST", "consul")
-CONSUL_PORT = 8500
+CONSUL_PORT = int(os.getenv("CONSUL_PORT", "8500"))
+
+CONSUL_BASE = f"http://{CONSUL_HOST}:{CONSUL_PORT}"
+REGISTER_URL = f"{CONSUL_BASE}/v1/agent/service/register"
+
+SESSION = requests.Session()
+SESSION.headers.update({"Accept": "application/json"})
+TIMEOUT = 2.5
 
 @app.route("/info")
 def info():
@@ -19,9 +24,8 @@ def info():
         "host": socket.gethostname()
     })
 
-def register_with_consul():
-    url = f"http://{CONSUL_HOST}:{CONSUL_PORT}/v1/agent/service/register"
-    payload = {
+def build_payload():
+    return {
         "Name": SERVICE_NAME,
         "ID": SERVICE_NAME,
         "Address": SERVICE_NAME,
@@ -33,12 +37,24 @@ def register_with_consul():
             "DeregisterCriticalServiceAfter": "10s"
         }
     }
+
+def try_register():
     try:
-        res = requests.put(url, json=payload)
-        print("Registered with Consul:", res.status_code)
+        r = SESSION.put(REGISTER_URL, json=build_payload(), timeout=TIMEOUT)
+        if r.status_code == 200:
+            print(f"[consul] registered {SERVICE_NAME}")
+            return True
+        print(f"[consul] register {SERVICE_NAME} -> {r.status_code} {r.text}")
     except Exception as e:
-        print("Failed to register with Consul:", e)
+        print(f"[consul] register error: {e}")
+    return False
+
+def ensure_registration():
+    delay = 2
+    while not try_register():
+        time.sleep(delay)
+        delay = min(delay * 2, 30)  # backoff up to 30s
 
 if __name__ == "__main__":
-    register_with_consul()
+    threading.Thread(target=ensure_registration, daemon=True).start()
     app.run(host="0.0.0.0", port=SERVICE_PORT)
