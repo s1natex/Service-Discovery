@@ -22,6 +22,8 @@ docker-compose up --build
 | API Gateway      | [http://localhost:8000/services](http://localhost:8000/services) |
 | Consul Dashboard | [http://localhost:8500](http://localhost:8500)                   |
 ```
+## [Run the project with Kubernetes](./k8s/README.md)
+
 ### Features
 - Dummy services auto-register with Consul, up to 9 services
 - API Gateway discovers and proxies routes dynamically
