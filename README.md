@@ -1,5 +1,5 @@
 # Service Discovery Demo Project
-A service discovery Project with 3 dummy services using Consul displayed with a Frontend
+A service discovery Project with dummy services registering with Consul and an api that connects consul discovery to a frontend dashboard service
 ## [Project Page](https://roadmap.sh/projects/service-discovery)
 ![Diagram](Diagram.drawio.png)
 ## Project Overview
@@ -23,7 +23,7 @@ docker-compose up --build
 | Consul Dashboard | [http://localhost:8500](http://localhost:8500)                   |
 ```
 ### Features
-- Dummy services auto-register with Consul
+- Dummy services auto-register with Consul, up to 9 services
 - API Gateway discovers and proxies routes dynamically
 - Frontend shows:
     - Service name and hostname
