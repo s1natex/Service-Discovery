@@ -61,3 +61,11 @@ docker start <service>
 # Check Frontend responding
 
 docker-compose down
+```
+## Screenshots:
+### Consul dashboard
+[Consul dashboard](media/consul-nodes.png)
+### Frontend
+[Frontend](media/frontend.png)
+### Service Endpoint
+[Service Endpoint](media/service-endpoint.png)
