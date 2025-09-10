@@ -16,7 +16,17 @@ repos:
     hooks:
       - id: bandit
         name: bandit (python security)
-        args: ["-r", "service", "gateway", "healthz", "-x", "frontend", "--severity-level", "medium", "--confidence-level", "medium"]
+        args: ["-ll", "-ii"]
+        files: ^(service|gateway|healthz)/.*\.py$
+
+  - repo: local
+    hooks:
+      - id: hadolint
+        name: hadolint (Dockerfile security)
+        language: docker_image
+        entry: hadolint/hadolint:latest
+        files: (?i)(^|/)(Dockerfile|dockerfile)(\..*)?$
+        pass_filenames: true
 
   - repo: https://github.com/zricethezav/gitleaks
     rev: v8.18.4
@@ -24,10 +34,3 @@ repos:
       - id: gitleaks
         name: gitleaks (secrets scan)
         args: ["protect", "--staged", "--redact"]
-
-  - repo: https://github.com/hadolint/hadolint
-    rev: v2.12.0
-    hooks:
-      - id: hadolint
-        name: hadolint (Dockerfile security)
-        files: '(?i)^(Dockerfile|.*/Dockerfile|dockerfile|Dockerfile\\..*)$'

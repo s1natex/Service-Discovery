@@ -15,11 +15,12 @@ service-discovery/
 - Kubernetes
 - Run Pre commit deps:
 ```
-pip install pre-commit
-pre-commit install
+python -m pip install --upgrade pip
+python -m pip install pre-commit
+python -m pre_commit install
 
 # for baseline run once
-pre-commit run --all-files
+python -m pre_commit run --all-files
 ```
 ### Run the project
 ```

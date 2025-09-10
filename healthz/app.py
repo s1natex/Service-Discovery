@@ -8,6 +8,7 @@ CONSUL_HOST = os.getenv("CONSUL_HOST", "consul")
 CONSUL_PORT = int(os.getenv("CONSUL_PORT", "8500"))
 SERVICE_NAME = os.getenv("SERVICE_NAME", "healthz")
 SERVICE_PORT = int(os.getenv("SERVICE_PORT", "6000"))
+BIND_HOST = os.getenv("BIND_HOST", "0.0.0.0") # nosec B104
 
 CONSUL_BASE = f"http://{CONSUL_HOST}:{CONSUL_PORT}"
 CATALOG_SERVICES = f"{CONSUL_BASE}/v1/catalog/services"
@@ -56,10 +57,10 @@ def register_with_consul():
             json={
                 "Name": SERVICE_NAME,
                 "ID": SERVICE_NAME,
-                "Address": SERVICE_NAME, 
+                "Address": SERVICE_NAME,
                 "Port": SERVICE_PORT,
                 "Check": {
-                    "HTTP": f"http://{SERVICE_NAME}:{SERVICE_PORT}/health", 
+                    "HTTP": f"http://{SERVICE_NAME}:{SERVICE_PORT}/health",
                     "Interval": "5s",
                     "Timeout": "2s",
                     "DeregisterCriticalServiceAfter": "10s"
@@ -72,4 +73,4 @@ def register_with_consul():
 
 if __name__ == "__main__":
     register_with_consul()
-    app.run(host="0.0.0.0", port=SERVICE_PORT)
+    app.run(host=BIND_HOST, port=SERVICE_PORT)

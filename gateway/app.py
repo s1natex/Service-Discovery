@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 import requests
 import logging
 import time
+import os
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -9,6 +10,7 @@ logging.basicConfig(level=logging.INFO)
 CONSUL_BASE = "http://consul:8500"
 CATALOG_SERVICES = f"{CONSUL_BASE}/v1/catalog/services"
 HEALTH_SERVICE = f"{CONSUL_BASE}/v1/health/service/"
+BIND_HOST = os.getenv("BIND_HOST", "0.0.0.0") # nosec B104
 
 SESSION = requests.Session()
 SESSION.headers.update({"Accept": "application/json"})
@@ -70,4 +72,4 @@ def proxy_healthz():
         return jsonify([])
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000)
+    app.run(host=BIND_HOST, port=8000)

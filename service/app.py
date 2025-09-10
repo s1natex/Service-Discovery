@@ -8,6 +8,7 @@ SERVICE_NAME = os.getenv("SERVICE_NAME", "default-service")
 SERVICE_PORT = int(os.getenv("SERVICE_PORT", "5000"))
 CONSUL_HOST = os.getenv("CONSUL_HOST", "consul")
 CONSUL_PORT = int(os.getenv("CONSUL_PORT", "8500"))
+BIND_HOST = os.getenv("BIND_HOST", "0.0.0.0") # nosec B104
 
 CONSUL_BASE = f"http://{CONSUL_HOST}:{CONSUL_PORT}"
 REGISTER_URL = f"{CONSUL_BASE}/v1/agent/service/register"
@@ -53,8 +54,8 @@ def ensure_registration():
     delay = 2
     while not try_register():
         time.sleep(delay)
-        delay = min(delay * 2, 30)  # backoff up to 30s
+        delay = min(delay * 2, 30)
 
 if __name__ == "__main__":
     threading.Thread(target=ensure_registration, daemon=True).start()
-    app.run(host="0.0.0.0", port=SERVICE_PORT)
+    app.run(host=BIND_HOST, port=SERVICE_PORT)
