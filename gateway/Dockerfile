@@ -4,8 +4,11 @@ WORKDIR /app
 
 COPY app.py .
 
-RUN pip install flask requests
+RUN pip install --no-cache-dir flask requests
 
 EXPOSE 8000
+
+HEALTHCHECK --interval=5s --timeout=2s --retries=5 --start-period=5s \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/services', timeout=1)" || exit 1
 
 CMD ["python", "app.py"]

@@ -2,45 +2,27 @@ import { useEffect, useState } from 'react'
 import axios from 'axios'
 
 function App() {
-  const [services, setServices] = useState([
-    { service: 'service-a' },
-    { service: 'service-b' },
-    { service: 'service-c' }
-  ])
+  const [services, setServices] = useState([])
   const [now, setNow] = useState(Date.now())
 
   useEffect(() => {
     const fetchServices = async () => {
-      const updated = await Promise.all(
-        services.map(async (svc) => {
-          const name = svc.service
-          const start = performance.now()
-          try {
-            const res = await axios.get(`/api/service/${name}`, { timeout: 1000 })
-            const end = performance.now()
-            const baseTime = new Date(res.data.timestamp).getTime()
-
-            return {
-              ...res.data,
-              baseTimestamp: baseTime,
-              fetchedAt: Date.now(),
-              status: 'online',
-              responseTime: Math.round(end - start)
-            }
-          } catch (err) {
-            return {
-              service: name,
-              status: 'offline',
-              timestamp: 'N/A',
-              host: 'N/A',
-              baseTimestamp: null,
-              fetchedAt: null,
-              responseTime: null
-            }
+      try {
+        const res = await axios.get('/api/services', { timeout: 1500 })
+        const fetchedAt = Date.now()
+        const normalized = res.data.map(item => {
+          const baseTime = item.timestamp && item.timestamp !== 'N/A'
+            ? new Date(item.timestamp).getTime()
+            : null
+          return {
+            ...item,
+            baseTimestamp: baseTime,
+            fetchedAt,
           }
         })
-      )
-      setServices(updated)
+        setServices(normalized)
+      } catch {
+      }
     }
 
     fetchServices()
@@ -74,11 +56,11 @@ function App() {
                   backgroundColor: svc.status === 'online' ? '#28a745' : '#dc3545'
                 }}
               >
-                {svc.status?.toUpperCase() || 'UNKNOWN'}
+                {(svc.status || 'unknown').toUpperCase()}
               </span>
             </div>
             <p><strong>Timestamp:</strong><br />{formatTimestamp(svc.baseTimestamp, svc.fetchedAt)}</p>
-            <p><strong>Response Time:</strong> {svc.responseTime !== null ? `${svc.responseTime} ms` : 'N/A'}</p>
+            <p><strong>Response Time:</strong> {svc.responseTime != null ? `${svc.responseTime} ms` : 'N/A'}</p>
             <p style={styles.host}>🖥️ {svc.host || 'N/A'}</p>
           </div>
         ))}
@@ -88,48 +70,13 @@ function App() {
 }
 
 const styles = {
-  container: {
-    textAlign: 'center',
-    padding: '2rem',
-  },
-  title: {
-    fontSize: '2.5rem',
-    fontWeight: '600',
-    marginBottom: '2rem',
-    color: '#333',
-  },
-  grid: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '2rem',
-    flexWrap: 'wrap',
-  },
-  card: {
-    backgroundColor: '#fff',
-    padding: '1.5rem',
-    borderRadius: '12px',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-    width: '260px',
-    textAlign: 'left',
-    transition: 'transform 0.2s ease',
-  },
-  cardHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  badge: {
-    padding: '0.25rem 0.5rem',
-    borderRadius: '6px',
-    color: 'white',
-    fontSize: '0.75rem',
-    fontWeight: 'bold',
-  },
-  host: {
-    marginTop: '1rem',
-    color: '#777',
-    fontSize: '0.9rem',
-  },
+  container: { textAlign: 'center', padding: '2rem' },
+  title: { fontSize: '2.5rem', fontWeight: 600, marginBottom: '2rem', color: '#333' },
+  grid: { display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap' },
+  card: { backgroundColor: '#fff', padding: '1.5rem', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', width: '260px', textAlign: 'left', transition: 'transform 0.2s ease' },
+  cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  badge: { padding: '0.25rem 0.5rem', borderRadius: '6px', color: 'white', fontSize: '0.75rem', fontWeight: 'bold' },
+  host: { marginTop: '1rem', color: '#777', fontSize: '0.9rem' },
 }
 
 export default App

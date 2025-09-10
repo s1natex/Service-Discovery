@@ -24,10 +24,10 @@ def register_with_consul():
     payload = {
         "Name": SERVICE_NAME,
         "ID": SERVICE_NAME,
-        "Address": socket.gethostbyname(socket.gethostname()),
+        "Address": SERVICE_NAME,
         "Port": SERVICE_PORT,
         "Check": {
-            "HTTP": f"http://{socket.gethostname()}:{SERVICE_PORT}/info",
+            "HTTP": f"http://{SERVICE_NAME}:{SERVICE_PORT}/info",
             "Interval": "5s",
             "Timeout": "2s",
             "DeregisterCriticalServiceAfter": "10s"
