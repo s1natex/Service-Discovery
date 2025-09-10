@@ -5,8 +5,7 @@ services:
       - "8500:8500"
       - "8600:8600/udp"
     command: "agent -dev -client=0.0.0.0"
-    networks:
-      - app-network
+    networks: [app-network]
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8500/v1/status/leader >/dev/null"]
       interval: 5s
@@ -15,15 +14,12 @@ services:
       start_period: 5s
 
   service-a:
-    build:
-      context: ./service
+    build: { context: ./service }
     environment:
       - SERVICE_NAME=service-a
       - SERVICE_PORT=5000
-    networks:
-      - app-network
-    depends_on:
-      - consul
+    networks: [app-network]
+    depends_on: [consul]
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:5000/info', timeout=1)\""]
       interval: 5s
@@ -32,15 +28,12 @@ services:
       start_period: 5s
 
   service-b:
-    build:
-      context: ./service
+    build: { context: ./service }
     environment:
       - SERVICE_NAME=service-b
       - SERVICE_PORT=5000
-    networks:
-      - app-network
-    depends_on:
-      - consul
+    networks: [app-network]
+    depends_on: [consul]
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:5000/info', timeout=1)\""]
       interval: 5s
@@ -49,15 +42,12 @@ services:
       start_period: 5s
 
   service-c:
-    build:
-      context: ./service
+    build: { context: ./service }
     environment:
       - SERVICE_NAME=service-c
       - SERVICE_PORT=5000
-    networks:
-      - app-network
-    depends_on:
-      - consul
+    networks: [app-network]
+    depends_on: [consul]
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:5000/info', timeout=1)\""]
       interval: 5s
@@ -66,15 +56,12 @@ services:
       start_period: 5s
 
   service-d:
-    build:
-      context: ./service
+    build: { context: ./service }
     environment:
       - SERVICE_NAME=service-d
       - SERVICE_PORT=5000
-    networks:
-      - app-network
-    depends_on:
-      - consul
+    networks: [app-network]
+    depends_on: [consul]
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:5000/info', timeout=1)\""]
       interval: 5s
@@ -82,15 +69,23 @@ services:
       retries: 5
       start_period: 5s
 
+  healthz:
+    build: { context: ./healthz }
+    networks: [app-network]
+    depends_on: [consul]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:6000/health', timeout=1)\""]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+      start_period: 5s
+
   gateway:
-    build:
-      context: ./gateway
+    build: { context: ./gateway }
     ports:
       - "8000:8000"
-    networks:
-      - app-network
-    depends_on:
-      - consul
+    networks: [app-network]
+    depends_on: [consul, healthz]
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/services', timeout=1)\""]
       interval: 5s
@@ -99,16 +94,13 @@ services:
       start_period: 5s
 
   frontend:
-    build:
-      context: ./frontend
+    build: { context: ./frontend }
     ports:
       - "3000:80"
-    networks:
-      - app-network
-    depends_on:
-      - gateway
+    networks: [app-network]
+    depends_on: [gateway]
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost/ >/dev/null"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost/health >/dev/null"]
       interval: 5s
       timeout: 2s
       retries: 5
