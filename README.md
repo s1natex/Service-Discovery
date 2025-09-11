@@ -7,7 +7,7 @@ A service discovery Project with dummy services registering with Consul and an a
 service-discovery/
 ├── docker-compose.yml
 ├── gateway/              # API Gateway (Python + Flask)
-├── service/              # Dummy service template (A, B, C)
+├── service/              # Dummy service template
 ├── frontend/             # React app (Vite + Nginx)
 ```
 ### Prerequisites:
@@ -22,7 +22,7 @@ python -m pre_commit install
 # for baseline run once
 python -m pre_commit run --all-files
 ```
-### Run the project
+### Run the project with Compose
 ```
 docker-compose up --build
 
@@ -45,9 +45,6 @@ docker-compose up --build
 - Fully containerized with Docker
 ### Testing the System
 ```
-# Start the app
-docker-compose up --build
-
 # Wait until all services are up watch the logs
 Registered with Consul: 200
  * Running on http://0.0.0.0:5000

@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: service-discovery-frontend
+          image: s1natex/service-discovery:frontend-0.1.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
