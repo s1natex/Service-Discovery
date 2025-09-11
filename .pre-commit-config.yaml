@@ -24,9 +24,9 @@ repos:
     hooks:
       - id: hadolint
         name: hadolint (Dockerfile security)
-        language: docker_image
-        entry: hadolint/hadolint:latest
-        files: (?i)(^|/)(Dockerfile|dockerfile)(\..*)?$
+        language: system
+        entry: bash -lc 'status=0; for f in "$@"; do echo "hadolint <$f"; docker run --rm -i hadolint/hadolint < "$f" || status=$?; done; exit $status' --
+        types_or: [dockerfile]
         pass_filenames: true
 
   - repo: https://github.com/zricethezav/gitleaks

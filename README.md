@@ -26,11 +26,11 @@ python -m pre_commit run --all-files
 ```
 docker-compose up --build
 
-| Component        | URL                                                              |
-| ---------------- | ---------------------------------------------------------------- |
-| Frontend UI      | [http://localhost:3000](http://localhost:3000)                   |
-| API Gateway      | [http://localhost:8000/services](http://localhost:8000/services) |
-| Consul Dashboard | [http://localhost:8500](http://localhost:8500)                   |
+Frontend UI ------- http://localhost:3000
+API Gateway ------- http://localhost:8000/services
+Consul Dashboard -- http://localhost:8500
+Frontend health --- http://localhost:3000/health
+Gateway health ---- http://localhost:8000/healthz
 ```
 ## [Run the project with Kubernetes](./k8s/README.md)
 
