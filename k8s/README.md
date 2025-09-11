@@ -14,18 +14,18 @@ kubectl get pods -n service-discovery -w
 kubectl get svc  -n service-discovery
 
 # 5) Apply Ingress
-## (make sure ingress-nginx controller is installed once per cluster)
+### (make sure ingress-nginx controller is installed once per cluster)
 kubectl get pods -n ingress-nginx || \
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
 
 kubectl -n service-discovery apply -f ingress.yaml
 
 # 6) Test the deployment and cleanup
-## - Test:
+### - Test:
 http://localhost/         → frontend
 http://localhost/services → gateway services
 http://localhost/healthz  → gateway health
 
-## - Clean Up:
+### - Clean Up:
 kubectl delete namespace service-discovery
 kubectl get ns service-discovery -w
