@@ -1,7 +1,7 @@
 # Service Discovery Demo Project
 A service discovery Project with dummy services registering with Consul and an api that connects consul discovery to a frontend dashboard service, can be deployed using Docker compose or Kubernetes
 ## [Project Page](https://roadmap.sh/projects/service-discovery)
-![Diagram](Diagram.drawio.png)
+![Diagram](docs/media/Diagram.drawio.png)
 ## Project Overview
 ```
 service-discovery/
@@ -32,7 +32,7 @@ Consul Dashboard -- http://localhost:8500
 Frontend health --- http://localhost:3000/health
 Gateway health ---- http://localhost:8000/healthz
 ```
-## [Run the project with Kubernetes](./k8s/README.md)
+## [Run the project with Kubernetes](docs/K8s.md)
 
 ### Features
 - Dummy services auto-register with Consul, up to 9 services
@@ -72,6 +72,6 @@ docker start <service>
 docker-compose down
 ```
 ## Screenshots:
-![Consul dashboard](media/consul-nodes.png)
-![Frontend](media/frontend.png)
-![Service Endpoint](media/service-endpoint.png)
+![Consul dashboard](docs/media/consul-nodes.png)
+![Frontend](docs/media/frontend.png)
+![Service Endpoint](docs/media/service-endpoint.png)
