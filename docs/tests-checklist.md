@@ -37,14 +37,13 @@ curl -I http://consul.localhost/
 curl -I http://argocd.localhost/
 ```
 - ## Test CI/CD process:
-#### 1) Make Changes in one of the following folders:
-    - `frontend/`
-    - `gateway/`
-    - `service/`
-    - `healthz/`
-#### 2) Add -> Commit -> Push to main branch on GitHub
-#### 3) Watch CI workflow: Detect-test-build-tag-publish-update manifests-`[skip-ci]commit` back to GitHub
-#### 4) Access ArgoCD UI with Username and Password:
+#### 1) Access the ingress endpoints to see the changes to be made:
+- `http://localhost/` ----------- `frontend`
+- `http://localhost/services` --- `gateway`
+- `http://localhost/healthz` ---- `gateway-healthz`
+- `http://consul.localhost/` ---- `Consul UI`
+- `http://argocd.localhost/` ---- `Argo CD UI`
+#### 2) Access ArgoCD UI with Username and Password:
 ```
 # Username:
 admin
@@ -52,13 +51,16 @@ admin
 # Password:
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d && echo
 ```
-#### 5) Watch Auto Sync Rollout
-#### 6) Access one of the Browser ingress addresses and see the changes made:
-- `http://localhost/` ----------- `frontend`
-- `http://localhost/services` --- `gateway`
-- `http://localhost/healthz` ---- `gateway-healthz`
-- `http://consul.localhost/` ---- `Consul UI`
-- `http://argocd.localhost/` ---- `Argo CD UI`
+#### 3) Make changes in one of the following folders:
+```
+./frontend/
+./gateway/
+./service/
+./healthz/
+```
+#### 4) Add -> Commit -> Push to main Branch on GitHub
+#### 5) Watch CI Workflow: Detect-Test-Build-Tag-Publish-Update Manifests-`[skip-ci] commit` back to GitHub
+#### 6) Watch the Rollout on ArgoCD UI
 - ## Destroy the Cluster:
 ```
 python3 ./k8s/scripts/destroy.py --remove-argocd --remove-ingress
