@@ -4,8 +4,9 @@ import subprocess
 import sys
 import time
 
-K8S_NS = "app"
+K8S_NS = "service-discovery"
 INGRESS_NS = "ingress-nginx"
+ARGO_NS = "argocd"
 INGRESS_MANIFEST = "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml"
 
 def run(cmd: list[str], check: bool = True, capture_output: bool = False) -> subprocess.CompletedProcess:
@@ -32,6 +33,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Destroy Service Discovery stack from Docker Desktop K8s")
     parser.add_argument("--context", default="docker-desktop", help="kubectl context (default: docker-desktop)")
     parser.add_argument("--remove-ingress", action="store_true", help="Also remove ingress-nginx controller")
+    parser.add_argument("--remove-argocd", action="store_true", help="Also remove Argo CD (argocd namespace)")
     parser.add_argument("--wait-timeout", type=int, default=300, help="Timeout in seconds for waits (default 300)")
     args = parser.parse_args()
 
@@ -44,6 +46,14 @@ def main() -> None:
         wait_for_ns_gone(K8S_NS, timeout_sec=args.wait_timeout)
     else:
         print(f"Namespace {K8S_NS} not found; skipping.")
+
+    if args.remove_argocd:
+        if ns_exists(ARGO_NS):
+            print(f"Deleting namespace {ARGO_NS} ...")
+            kubectl("delete", "ns", ARGO_NS)
+            wait_for_ns_gone(ARGO_NS, timeout_sec=args.wait_timeout)
+        else:
+            print(f"Namespace {ARGO_NS} not found; skipping Argo CD removal.")
 
     if args.remove_ingress:
         if ns_exists(INGRESS_NS):
