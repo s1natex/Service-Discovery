@@ -47,7 +47,7 @@ function App() {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Service Discovery SyncTest: -0-</h1>
+      <h1 style={styles.title}>Service Discovery Demo</h1>
       <div style={styles.grid}>
         {services.map((svc, idx) => (
           <div key={idx} style={styles.card}>

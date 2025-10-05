@@ -26,12 +26,14 @@ curl -I http://localhost/
 curl -I http://localhost/services
 curl -I http://localhost/healthz
 curl -I http://consul.localhost/
+curl -I http://argocd.localhost/
 
 ingress paths
 http://localhost/
 http://localhost/services
 http://localhost/healthz
 http://consul.localhost/
+http://argocd.localhost/
 
 
 ===============================
