@@ -5,7 +5,7 @@ import sys
 import time
 from pathlib import Path
 
-K8S_NS = "service-discovery"
+K8S_NS = "app"
 INGRESS_NS = "ingress-nginx"
 ARGO_NS = "argocd"
 
@@ -21,6 +21,7 @@ MANIFESTS = [
     "healthz.yaml",
     "gateway.yaml",
     "frontend.yaml",
+    "ingress.yaml",
 ]
 
 def run(cmd: list[str], check: bool = True, capture_output: bool = False) -> subprocess.CompletedProcess:
@@ -75,7 +76,7 @@ def apply_file(path: Path, namespace: str | None = None) -> None:
 def apply_many(files: list[Path], namespace: str) -> None:
     for f in files:
         print(f"Applying {f.name} ...")
-        apply_file(f, namespace)
+        apply_file(f, namespace if f.name != "namespace.yaml" else None)
 
 def ensure_ingress_nginx(install: bool, wait_timeout: int) -> None:
     if ns_exists(INGRESS_NS):
@@ -92,79 +93,70 @@ def ensure_ingress_nginx(install: bool, wait_timeout: int) -> None:
         except subprocess.CalledProcessError:
             wait_for_pods_ready(INGRESS_NS, timeout_sec=wait_timeout)
 
-def ensure_argocd(wait_timeout: int) -> None:
+def ensure_argocd(wait_timeout: int, repo_root: Path) -> None:
     if not ns_exists(ARGO_NS):
         print("Creating argocd namespace ...")
-        here = Path(__file__).resolve().parent.parent
-        apply_file(here / "argocd" / "namespace.yaml")
+        apply_file(repo_root / "argocd" / "namespace.yaml")
     if not ns_exists(ARGO_NS):
         raise SystemExit("Failed to create argocd namespace")
 
-    # Install Argo CD core
     print("Installing Argo CD ...")
     kubectl("apply", "-n", ARGO_NS, "-f", ARGOCD_INSTALL)
 
     # Make server run insecure for HTTP ingress
-    here = Path(__file__).resolve().parent.parent
-    apply_file(here / "argocd" / "argocd-cmd-params-cm.yaml")
+    apply_file(repo_root / "argocd" / "argocd-cmd-params-cm.yaml")
 
-    # Wait for argocd-server to be available
     try:
         wait_for_deploy(ARGO_NS, "argocd-server", timeout_sec=wait_timeout)
     except subprocess.CalledProcessError:
         wait_for_pods_ready(ARGO_NS, timeout_sec=wait_timeout)
 
-    # Ingress
     print("Applying Argo CD Ingress ...")
-    apply_file(here / "argocd" / "ingress.yaml")
+    apply_file(repo_root / "argocd" / "ingress.yaml")
 
-    # AppProject + Application (auto-sync)
     print("Applying Argo CD Project/Application ...")
-    apply_file(here / "argocd" / "project.yaml")
-    apply_file(here / "argocd" / "application.yaml")
+    apply_file(repo_root / "argocd" / "project.yaml")
+    apply_file(repo_root / "argocd" / "application.yaml")
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Deploy Service Discovery stack to Docker Desktop K8s")
+    parser = argparse.ArgumentParser(description="Deploy stack to Docker Desktop K8s")
     parser.add_argument("--context", default="docker-desktop", help="kubectl context (default: docker-desktop)")
     parser.add_argument("--install-ingress", action="store_true", help="Install ingress-nginx if missing")
     parser.add_argument("--wait-timeout", type=int, default=300, help="Timeout in seconds for waits (default 300)")
     parser.add_argument("--with-argocd", action="store_true", help="Install Argo CD (argocd ns) with ingress and app")
     args = parser.parse_args()
 
-    scripts_dir = Path(__file__).resolve().parent
-    k8s_dir = scripts_dir.parent / "k8s"
-    ns_file = scripts_dir.parent / "namespace.yaml"  # root namespace.yaml for service-discovery (as you had)
-    ingress_file = scripts_dir.parent / "ingress.yaml"
+    scripts_dir = Path(__file__).resolve().parent  # .../k8s/scripts
+    k8s_dir = scripts_dir.parent                   # fixed: was parent / "k8s"
+    repo_root = k8s_dir.parent
+
+    ns_file = k8s_dir / "namespace.yaml"
     manifest_paths = [k8s_dir / f for f in MANIFESTS]
 
     print(f"Setting kubectl context to {args.context} ...")
     kubectl("config", "use-context", args.context)
 
     print(f"Applying namespace: {ns_file}")
-    apply_file(ns_file)
+    apply_file(ns_file)  # ns is cluster-scoped
 
-    print("Applying core manifests to namespace 'service-discovery' ...")
+    print(f"Applying core manifests to namespace '{K8S_NS}' ...")
     apply_many(manifest_paths, K8S_NS)
 
     wait_for_pods_ready(K8S_NS, timeout_sec=args.wait_timeout)
 
     ensure_ingress_nginx(install=args.install_ingress, wait_timeout=args.wait_timeout)
 
-    print(f"Applying ingress: {ingress_file.name}")
-    time.sleep(30)
-    apply_file(ingress_file, K8S_NS)
-
     if args.with_argocd:
-        ensure_argocd(wait_timeout=args.wait_timeout)
+        ensure_argocd(wait_timeout=args.wait_timeout, repo_root=repo_root)
         print("Argo CD available at: http://argocd.localhost/")
 
     print("\nDeployment complete.\n")
     print("Quick checks:")
     print(f"  kubectl get pods -n {K8S_NS}")
     print(f"  kubectl get svc  -n {K8S_NS}")
-    print(f"  curl http://localhost/            # frontend")
-    print(f"  curl http://localhost/services    # gateway services")
-    print(f"  curl http://localhost/healthz     # gateway health")
+    print("  curl http://localhost/            # frontend via ingress")
+    print("  curl http://localhost/services    # gateway services")
+    print("  curl http://localhost/healthz     # gateway health")
     if args.with_argocd:
         print("  open http://argocd.localhost/     # Argo CD UI")
 

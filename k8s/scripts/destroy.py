@@ -4,7 +4,7 @@ import subprocess
 import sys
 import time
 
-K8S_NS = "service-discovery"
+K8S_NS = "app"  # fixed: was "service-discovery"
 INGRESS_NS = "ingress-nginx"
 ARGO_NS = "argocd"
 INGRESS_MANIFEST = "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml"
@@ -30,7 +30,7 @@ def wait_for_ns_gone(ns: str, timeout_sec: int = 300) -> None:
     raise SystemExit(f"Timeout: namespace {ns} still exists after {timeout_sec}s")
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Destroy Service Discovery stack from Docker Desktop K8s")
+    parser = argparse.ArgumentParser(description="Destroy stack from Docker Desktop K8s")
     parser.add_argument("--context", default="docker-desktop", help="kubectl context (default: docker-desktop)")
     parser.add_argument("--remove-ingress", action="store_true", help="Also remove ingress-nginx controller")
     parser.add_argument("--remove-argocd", action="store_true", help="Also remove Argo CD (argocd namespace)")

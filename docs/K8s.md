@@ -1,5 +1,5 @@
 deploy
-python3 scripts/deploy.py --install-ingress --with-argocd
+python3 ./k8s/scripts/deploy.py --install-ingress --with-argocd
 
 Check Namespaces & Resources
 kubectl get ns app ingress-nginx
@@ -35,6 +35,9 @@ curl -I http://localhost/healthz
 curl -I http://consul.localhost/
 curl -I http://argocd.localhost/
 
+user argo admin
+pass kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d && echo
+
 ingress paths
 http://localhost/
 http://localhost/services
@@ -45,7 +48,7 @@ http://argocd.localhost/
 
 ===============================
 destroy
-python3 scripts/destroy.py --remove-argocd --remove-ingress
+python3 ./k8s/scripts/destroy.py --remove-argocd --remove-ingress
 
 Confirm Namespace Removed
 kubectl get ns app
