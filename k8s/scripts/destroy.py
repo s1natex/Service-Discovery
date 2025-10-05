@@ -4,7 +4,7 @@ import subprocess
 import sys
 import time
 
-K8S_NS = "service-discovery"
+K8S_NS = "app"
 INGRESS_NS = "ingress-nginx"
 INGRESS_MANIFEST = "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml"
 

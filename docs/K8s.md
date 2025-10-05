@@ -1,65 +1,49 @@
-# Automated Deployment:
-```
-#Deploy:
-  # From repo root or anywhere:
-  python k8s/scripts/deploy.py --install-ingress
+deploy
+python3 ./k8s/scripts/deploy.py --install-ingress
 
-  # if ingress-nginx is already installed:
-  python k8s/scripts/deploy.py
+Check Namespaces & Resources
+kubectl get ns app ingress-nginx
+kubectl -n app get all
+kubectl -n ingress-nginx get pods -l app.kubernetes.io/component=controller
 
-#Destroy:
-  # Full Destroy:
-  python k8s/scripts/destroy.py --remove-ingress
+Check Pods & Deployments
+kubectl -n app get pods -o wide
+kubectl -n app get deployments
+kubectl -n app rollout status deploy/frontend
+kubectl -n app rollout status deploy/consul
 
-  # Destroy and keep ingress-nginx:
-  python k8s/scripts/destroy.py
+Verify Services
+kubectl -n app get svc
+kubectl -n app describe svc frontend
+kubectl -n app describe svc consul
 
-#Validation after deploy or destroy
-  kubectl get ns service-discovery -w
-  kubectl get ns ingress-nginx -w
-```
+Verify Ingress Setup
+kubectl -n app get ingress
+kubectl -n app describe ingress service-discovery-ingress
 
-# Manual Deployment:
-## 1) Ensure Docker Desktop K8s
-```
-kubectl config use-context docker-desktop
-```
-## 2) Apply namespace first (inside k8s/)
-```
-kubectl apply -f namespace.yaml
-```
-## 3) Apply all manifests(GitBash)
-```
-kubectl -n service-discovery apply -f consul.yaml \
-  -f service-a.yaml -f service-b.yaml -f service-c.yaml -f service-d.yaml \
-  -f healthz.yaml -f gateway.yaml -f frontend.yaml
-```
-## 4) Watch pods and services
-```
-kubectl get pods -n service-discovery -w
-kubectl get svc  -n service-discovery
-```
-## 5) Apply Ingress
-### (make sure ingress-nginx controller is installed once per cluster)
-```
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
-kubectl get ns ingress-nginx -w
+curl tests
+curl -I http://localhost/
+curl -I http://localhost/services
+curl -I http://localhost/healthz
+curl -I http://consul.localhost/
 
-# wait until nginx is up
-kubectl apply -f ingress.yaml
-kubectl get pods -n service-discovery
-```
-## 6) Test the deployment and cleanup
-### Test:
-```
-http://localhost/         → frontend
-http://localhost/services → gateway services
-http://localhost/healthz  → gateway health
-```
-### Clean Up:
-```
-kubectl delete namespace service-discovery
-kubectl get ns service-discovery -w
-kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
-kubectl get ns ingress-nginx -w
-```
+ingress paths
+http://localhost/
+http://localhost/services
+http://localhost/healthz
+http://consul.localhost/
+
+
+===============================
+destroy
+python3 ./k8s/scripts/destroy.py --remove-ingress
+
+Confirm Namespace Removed
+kubectl get ns app
+
+Check Ingress (if not removed)
+kubectl get ns ingress-nginx
+kubectl -n ingress-nginx get all
+
+Verify Cluster Clean
+kubectl get all --all-namespaces

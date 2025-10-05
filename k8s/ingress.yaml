@@ -2,13 +2,14 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: service-discovery-ingress
-  namespace: service-discovery
+  namespace: app
 spec:
   ingressClassName: nginx
   rules:
-    - http:
+    # localhost -> frontend (and gateway paths)
+    - host: localhost
+      http:
         paths:
-          # Frontend at /
           - path: /
             pathType: Prefix
             backend:
@@ -16,8 +17,6 @@ spec:
                 name: frontend
                 port:
                   number: 80
-
-          # Gateway endpoints directly on these paths
           - path: /services
             pathType: Prefix
             backend:
@@ -32,3 +31,15 @@ spec:
                 name: gateway
                 port:
                   number: 8000
+
+    # consul.localhost -> consul UI
+    - host: consul.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: consul
+                port:
+                  number: 8500

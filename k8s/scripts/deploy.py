@@ -5,7 +5,7 @@ import sys
 import time
 from pathlib import Path
 
-K8S_NS = "service-discovery"
+K8S_NS = "app"
 INGRESS_NS = "ingress-nginx"
 INGRESS_MANIFEST = "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml"
 
@@ -36,8 +36,9 @@ def wait_for_deploy(ns: str, name: str, timeout_sec: int = 300) -> None:
 
 def wait_for_pods_ready(ns: str, label_selector: str = "", timeout_sec: int = 300) -> None:
     print(f"Waiting for Pods in {ns} to be Ready (timeout {timeout_sec}s)...")
-    start = time.time()
-    while time.time() - start < timeout_sec:
+    import time as _t
+    start = _t.time()
+    while _t.time() - start < timeout_sec:
         args = ["-n", ns, "get", "pods", "--no-headers"]
         if label_selector:
             args.extend(["-l", label_selector])
@@ -60,7 +61,7 @@ def wait_for_pods_ready(ns: str, label_selector: str = "", timeout_sec: int = 30
             if total > 0 and ready == total:
                 print(f"All Pods Ready in {ns}.")
                 return
-        time.sleep(2)
+        _t.sleep(2)
     raise SystemExit(f"Timeout: Pods in namespace {ns} not Ready in {timeout_sec}s")
 
 def apply_file(path: Path, namespace: str | None = None) -> None:
@@ -108,7 +109,7 @@ def main() -> None:
     print(f"Applying namespace: {ns_file}")
     apply_file(ns_file)
 
-    print("Applying core manifests to namespace 'service-discovery' ...")
+    print("Applying core manifests to namespace 'app' ...")
     apply_many(manifest_paths, K8S_NS)
 
     wait_for_pods_ready(K8S_NS, timeout_sec=args.wait_timeout)
@@ -116,7 +117,8 @@ def main() -> None:
     ensure_ingress_nginx(install=args.install_ingress, wait_timeout=args.wait_timeout)
 
     print(f"Applying ingress: {ingress_file.name}")
-    time.sleep(30)  # Give ingress-nginx a moment to settle
+    import time as _t
+    _t.sleep(30)  # Give ingress-nginx a moment to settle
     apply_file(ingress_file, K8S_NS)
 
     print("\nDeployment complete.\n")
@@ -126,6 +128,7 @@ def main() -> None:
     print(f"  curl http://localhost/            # frontend")
     print(f"  curl http://localhost/services    # gateway services")
     print(f"  curl http://localhost/healthz     # gateway health")
+    print(f"  curl http://consul.localhost/     # consul UI")
 
 if __name__ == "__main__":
     try:
