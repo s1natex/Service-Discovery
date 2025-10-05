@@ -120,14 +120,13 @@ jobs:
           HEALTHZ_SVC: healthz
         run: |
           set -euo pipefail
-          # Per-file manifests in repo root
-          sed -i "s#${DOCKERHUB_REPO}:${FRONTEND_SVC}-[^[:space:]]\\+#${DOCKERHUB_REPO}:${FRONTEND_SVC}-${RELEASE_TAG}#g" frontend.yaml || true
-          sed -i "s#${DOCKERHUB_REPO}:${GATEWAY_SVC}-[^[:space:]]\\+#${DOCKERHUB_REPO}:${GATEWAY_SVC}-${RELEASE_TAG}#g"  gateway.yaml  || true
-          sed -i "s#${DOCKERHUB_REPO}:${HEALTHZ_SVC}-[^[:space:]]\\+#${DOCKERHUB_REPO}:${HEALTHZ_SVC}-${RELEASE_TAG}#g"  healthz.yaml  || true
-          for f in service-a.yaml service-b.yaml service-c.yaml service-d.yaml; do
+          # manifests are under ./k8s/
+          sed -i "s#${DOCKERHUB_REPO}:${FRONTEND_SVC}-[^[:space:]]\\+#${DOCKERHUB_REPO}:${FRONTEND_SVC}-${RELEASE_TAG}#g" k8s/frontend.yaml || true
+          sed -i "s#${DOCKERHUB_REPO}:${GATEWAY_SVC}-[^[:space:]]\\+#${DOCKERHUB_REPO}:${GATEWAY_SVC}-${RELEASE_TAG}#g"  k8s/gateway.yaml  || true
+          sed -i "s#${DOCKERHUB_REPO}:${HEALTHZ_SVC}-[^[:space:]]\\+#${DOCKERHUB_REPO}:${HEALTHZ_SVC}-${RELEASE_TAG}#g"  k8s/healthz.yaml  || true
+          for f in k8s/service-a.yaml k8s/service-b.yaml k8s/service-c.yaml k8s/service-d.yaml; do
             sed -i "s#${DOCKERHUB_REPO}:${SERVICE_SVC}-[^[:space:]]\\+#${DOCKERHUB_REPO}:${SERVICE_SVC}-${RELEASE_TAG}#g" "$f" || true
           done
-
           git status --porcelain
 
       - name: Commit manifest changes [skip-ci]
@@ -135,7 +134,7 @@ jobs:
           if ! git diff --quiet; then
             git config user.name  "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add frontend.yaml gateway.yaml healthz.yaml service-*.yaml
+            git add k8s/frontend.yaml k8s/gateway.yaml k8s/healthz.yaml k8s/service-*.yaml
             git commit -m "[skip-ci] Update image tags to ${RELEASE_TAG}"
             git push
           else
