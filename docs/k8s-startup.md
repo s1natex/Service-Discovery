@@ -4,11 +4,11 @@
 python3 ./k8s/scripts/deploy.py --install-ingress --with-argocd
 ```
 - ### Ingress Endpoints:
-    - `http://localhost/` ------------ `frontend`
-    - `http://localhost/services` ---- `gateway`
-    - `http://localhost/healthz` ----- `gateway-healthz`
-    - `http://consul.localhost/` ----- `Consul UI`
-    - `http://argocd.localhost/` ----- `Argo CD UI`
+- `http://localhost/` ------------ `frontend`
+- `http://localhost/services` ---- `gateway`
+- `http://localhost/healthz` ----- `gateway-healthz`
+- `http://consul.localhost/` ----- `Consul UI`
+- `http://argocd.localhost/` ----- `Argo CD UI`
 - ### ArgoCD Username and Password:
 ```
 # Username:
