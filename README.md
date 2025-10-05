@@ -18,7 +18,7 @@
 - `Image versioning`: DockerHub image tags use `name-yyyymmdd-sha` scheme
 - `Pre-commit hooks`: bandit (python), hadolint (dockerfiles), gitleaks (secrets), YAML/JSON formatting checks
 ## Project Diagram
-![System-Diagram](./docs/media)
+![System-Diagram](./docs/media/servicediscovery.drawio.png)
 ## Instructions Links
 - ### [Local Docker-Compose Deployment and Testing](./docs/docker-compose.md)
 - ### [Local Docker-Desktop Kubernetes Deployment](./docs/k8s-startup.md)
