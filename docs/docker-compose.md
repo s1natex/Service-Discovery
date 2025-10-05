@@ -1,17 +1,23 @@
+# Local Docker-Compose Deployment and Testing
+- ### From Project Root Run:
+```
 docker-compose up --build
-
-Frontend UI ------- http://localhost:3000
-API Gateway ------- http://localhost:8000/services
-Consul Dashboard -- http://localhost:8500
-Frontend health --- http://localhost:3000/health
-Gateway health ---- http://localhost:8000/healthz
-
-run local tests:
-at root run
+```
+- ### Access via browser:
+    - `Frontend UI` ------- http://localhost:3000
+    - `API Gateway` ------- http://localhost:8000/services
+    - `Consul Dashboard` -- http://localhost:8500
+    - `Frontend health` --- http://localhost:3000/health
+    - `Gateway health` ---- http://localhost:8000/healthz
+- ### Run Tests:
+```
+# From Project Root Run:
 python -m pytest -q
 
-# from frontend project root frontend/
-cd frontend
+# From ./frontend Run:
 npm run test
-
+```
+- ### Clean Up:
+```
 docker compose down
+```
