@@ -3,7 +3,7 @@
 ```
 python3 ./k8s/scripts/deploy.py --install-ingress --with-argocd
 ```
-- ## Run Validation Commands:
+- ## Run Deploy Validation Commands:
 ```
 # Check Namespaces & Resources
 kubectl get ns app ingress-nginx
@@ -43,7 +43,7 @@ curl -I http://argocd.localhost/
     - `service/`
     - `healthz/`
 #### 2) Add -> Commit -> Push to main branch on GitHub
-#### 3) Watch CI workflow: Detect-test-build-tag-publish-update manifests-commit back to GitHub[skip-ci]
+#### 3) Watch CI workflow: Detect-test-build-tag-publish-update manifests-`[skip-ci]commit` back to GitHub
 #### 4) Access ArgoCD UI with Username and Password:
 ```
 # Username:
@@ -63,7 +63,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 ```
 python3 ./k8s/scripts/destroy.py --remove-argocd --remove-ingress
 ```
-- ## Run Validation Commands:
+- ## Run Destroy Validation Commands:
 ```
 # Confirm Namespace Removed
 kubectl get ns app

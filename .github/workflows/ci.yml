@@ -9,7 +9,6 @@ on:
       - "gateway/**"
       - "service/**"
       - "healthz/**"
-      - "tests/**"
       - ".github/workflows/ci.yml"
 
 env:
