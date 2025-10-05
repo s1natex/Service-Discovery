@@ -21,6 +21,6 @@
 ![System-Diagram](./docs/media)
 ## Instructions Links
 - ### [Local Docker-Compose Deployment and Testing](./docs/docker-compose.md)
-- ### [Local Docker-Desktop Kubernetes Deployment](./docs/k8s.md)
+- ### [Local Docker-Desktop Kubernetes Deployment](./docs/k8s-startup.md)
 - ### [Cluster Deployment and Feature Testing Checklist](./docs/tests-checklist.md)
 - ### [Project Screenshots](./docs/screenshots.md)
