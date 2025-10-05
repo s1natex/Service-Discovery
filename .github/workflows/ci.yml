@@ -1,4 +1,4 @@
-name: CI-CD
+name: CI
 
 on:
   push:
@@ -10,7 +10,6 @@ on:
       - "service/**"
       - "healthz/**"
       - "tests/**"
-      - "docker-compose.ci.yml"
       - ".github/workflows/ci.yml"
 
 env:
@@ -26,13 +25,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+
       - name: Install deps
         working-directory: frontend
         run: |
           if [ -f package-lock.json ]; then npm ci; else npm i; fi
+
       - name: Run tests
         working-directory: frontend
         run: npm run test
@@ -42,13 +46,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Install deps
         run: |
           python -m pip install -U pip
           pip install pytest pytest-cov flask requests
+
       - name: Run tests
         run: pytest -q
 
@@ -56,18 +65,19 @@ jobs:
     name: Build and Push Images
     runs-on: ubuntu-latest
     needs: [test-frontend, test-python]
-    env:
-      DATE: ${{ github.event.repository.updated_at || '' }}
+    outputs:
+      release_tag: ${{ steps.meta.outputs.release_tag }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Compute release tag (name-yyyymmdd-sha)
-        id: tag
+        id: meta
         run: |
-          set -euo pipefail
           DATE=$(date -u +%Y%m%d)
           SHORT_SHA=${GITHUB_SHA::7}
-          echo "RELEASE_TAG=${DATE}-${SHORT_SHA}" >> "$GITHUB_ENV"
+          echo "release_tag=${DATE}-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -77,17 +87,17 @@ jobs:
 
       - name: Build images (cached) for final tags
         run: |
-          docker build -t ${DOCKERHUB_REPO}:${FRONTEND_SVC}-${RELEASE_TAG} ./frontend
-          docker build -t ${DOCKERHUB_REPO}:${GATEWAY_SVC}-${RELEASE_TAG}  ./gateway
-          docker build -t ${DOCKERHUB_REPO}:${SERVICE_SVC}-${RELEASE_TAG}  ./service
-          docker build -t ${DOCKERHUB_REPO}:${HEALTHZ_SVC}-${RELEASE_TAG}  ./healthz
+          docker build -t ${DOCKERHUB_REPO}:${FRONTEND_SVC}-${{ steps.meta.outputs.release_tag }} ./frontend
+          docker build -t ${DOCKERHUB_REPO}:${GATEWAY_SVC}-${{ steps.meta.outputs.release_tag }}  ./gateway
+          docker build -t ${DOCKERHUB_REPO}:${SERVICE_SVC}-${{ steps.meta.outputs.release_tag }}  ./service
+          docker build -t ${DOCKERHUB_REPO}:${HEALTHZ_SVC}-${{ steps.meta.outputs.release_tag }}  ./healthz
 
       - name: Push images
         run: |
-          docker push ${DOCKERHUB_REPO}:${FRONTEND_SVC}-${RELEASE_TAG}
-          docker push ${DOCKERHUB_REPO}:${GATEWAY_SVC}-${RELEASE_TAG}
-          docker push ${DOCKERHUB_REPO}:${SERVICE_SVC}-${RELEASE_TAG}
-          docker push ${DOCKERHUB_REPO}:${HEALTHZ_SVC}-${RELEASE_TAG}
+          docker push ${DOCKERHUB_REPO}:${FRONTEND_SVC}-${{ steps.meta.outputs.release_tag }}
+          docker push ${DOCKERHUB_REPO}:${GATEWAY_SVC}-${{ steps.meta.outputs.release_tag }}
+          docker push ${DOCKERHUB_REPO}:${SERVICE_SVC}-${{ steps.meta.outputs.release_tag }}
+          docker push ${DOCKERHUB_REPO}:${HEALTHZ_SVC}-${{ steps.meta.outputs.release_tag }}
 
   update-manifests:
     name: Update K8s image tags and commit
@@ -97,41 +107,35 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Update K8s image tags
         env:
-          RELEASE_TAG: ${{ env.RELEASE_TAG }}
+          RELEASE_TAG: ${{ needs.build-and-push.outputs.release_tag }}
+          DOCKERHUB_REPO: s1natex/service-discovery
+          FRONTEND_SVC: frontend
+          GATEWAY_SVC: gateway
+          SERVICE_SVC: service
+          HEALTHZ_SVC: healthz
         run: |
           set -euo pipefail
-          # Example: single aggregated manifest file
-          if [ -f k8s/apps/deployments.yaml ]; then
-            sed -i "s#${DOCKERHUB_REPO}:frontend-[^[:space:]]\\+#${DOCKERHUB_REPO}:${FRONTEND_SVC}-${RELEASE_TAG}#g" k8s/apps/deployments.yaml
-            sed -i "s#${DOCKERHUB_REPO}:gateway-[^[:space:]]\\+#${DOCKERHUB_REPO}:${GATEWAY_SVC}-${RELEASE_TAG}#g"   k8s/apps/deployments.yaml
-            sed -i "s#${DOCKERHUB_REPO}:service-[^[:space:]]\\+#${DOCKERHUB_REPO}:${SERVICE_SVC}-${RELEASE_TAG}#g"   k8s/apps/deployments.yaml
-            sed -i "s#${DOCKERHUB_REPO}:healthz-[^[:space:]]\\+#${DOCKERHUB_REPO}:${HEALTHZ_SVC}-${RELEASE_TAG}#g"   k8s/apps/deployments.yaml
-          fi
-
-          # If manifests are split per service (uncomment and adjust paths):
-          # sed -i "s#${DOCKERHUB_REPO}:frontend-[^[:space:]]\\+#${DOCKERHUB_REPO}:${FRONTEND_SVC}-${RELEASE_TAG}#g" frontend.yaml || true
-          # sed -i "s#${DOCKERHUB_REPO}:gateway-[^[:space:]]\\+#${DOCKERHUB_REPO}:${GATEWAY_SVC}-${RELEASE_TAG}#g"  gateway.yaml  || true
-          # sed -i "s#${DOCKERHUB_REPO}:healthz-[^[:space:]]\\+#${DOCKERHUB_REPO}:${HEALTHZ_SVC}-${RELEASE_TAG}#g"  healthz.yaml  || true
-          # for f in service-a.yaml service-b.yaml service-c.yaml service-d.yaml; do
-          #   sed -i "s#${DOCKERHUB_REPO}:service-[^[:space:]]\\+#${DOCKERHUB_REPO}:${SERVICE_SVC}-${RELEASE_TAG}#g" "$f" || true
-          # done
+          # Per-file manifests in repo root
+          sed -i "s#${DOCKERHUB_REPO}:${FRONTEND_SVC}-[^[:space:]]\\+#${DOCKERHUB_REPO}:${FRONTEND_SVC}-${RELEASE_TAG}#g" frontend.yaml || true
+          sed -i "s#${DOCKERHUB_REPO}:${GATEWAY_SVC}-[^[:space:]]\\+#${DOCKERHUB_REPO}:${GATEWAY_SVC}-${RELEASE_TAG}#g"  gateway.yaml  || true
+          sed -i "s#${DOCKERHUB_REPO}:${HEALTHZ_SVC}-[^[:space:]]\\+#${DOCKERHUB_REPO}:${HEALTHZ_SVC}-${RELEASE_TAG}#g"  healthz.yaml  || true
+          for f in service-a.yaml service-b.yaml service-c.yaml service-d.yaml; do
+            sed -i "s#${DOCKERHUB_REPO}:${SERVICE_SVC}-[^[:space:]]\\+#${DOCKERHUB_REPO}:${SERVICE_SVC}-${RELEASE_TAG}#g" "$f" || true
+          done
 
           git status --porcelain
 
       - name: Commit manifest changes [skip-ci]
-        if: ${{ !cancelled() }}
         run: |
           if ! git diff --quiet; then
             git config user.name  "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            # Commit whichever files changed:
-            if [ -f k8s/apps/deployments.yaml ]; then
-              git add k8s/apps/deployments.yaml
-            fi
-            # git add frontend.yaml gateway.yaml healthz.yaml service-*.yaml || true
+            git add frontend.yaml gateway.yaml healthz.yaml service-*.yaml
             git commit -m "[skip-ci] Update image tags to ${RELEASE_TAG}"
             git push
           else
