@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: service-d
-          image: s1natex/service-discovery:service-20251005-ccca76e
+          image: s1natex/service-discovery:service-20251005-23cdcde
           imagePullPolicy: IfNotPresent
           env:
             - name: SERVICE_NAME
