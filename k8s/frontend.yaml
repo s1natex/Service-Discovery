@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: s1natex/service-discovery:frontend-20251005-b859824
+          image: s1natex/service-discovery:frontend-20251005-579348a
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
