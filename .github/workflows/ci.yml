@@ -75,7 +75,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # ---------- Build images (cached) for final tags ----------
       - name: Build images (cached) for final tags
         run: |
           docker build -t ${DOCKERHUB_REPO}:${FRONTEND_SVC}-${RELEASE_TAG} ./frontend
@@ -99,8 +98,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # ---------- Update manifests and commit [skip-ci] ----------
-      # Adjust the target file(s) below to match your repo layout.
       - name: Update K8s image tags
         env:
           RELEASE_TAG: ${{ env.RELEASE_TAG }}

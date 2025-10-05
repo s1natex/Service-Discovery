@@ -1,0 +1,14 @@
+node_modules
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log
+dist
+.cache
+.DS_Store
+*.local
+.env
+*.tar
+*.gz
+*.zip
+.idea/
+.vscode/
