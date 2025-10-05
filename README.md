@@ -2,7 +2,7 @@
 [![CI](https://github.com/s1natex/Service-Discovery/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/s1natex/Service-Discovery/actions/workflows/ci.yml)
 [![Docker Pulls](https://img.shields.io/docker/pulls/s1natex/service-discovery.svg)](https://hub.docker.com/r/s1natex/service-discovery)
 
-### [Service Discovery Project idea Page](https://roadmap.sh/projects/service-discovery)
+### [Project idea Page](https://roadmap.sh/projects/service-discovery)
 ## Project Overview
 - `Consul-based registration`: each Flask service (service-a/b/c/d) self-registers with Consul and exposes /info
 - `Health aggregator`: healthz service provides /health and /report derived from Consul health endpoints
