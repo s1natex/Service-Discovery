@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: gateway
-          image: s1natex/service-discovery:gateway-20251005-1c07785
+          image: s1natex/service-discovery:gateway-20251005-37a524b
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
