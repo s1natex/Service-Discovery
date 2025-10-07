@@ -9,11 +9,11 @@
 - `API Gateway`: lists discovered services at /services and proxies cluster health at /healthz
 - `Frontend`: a dashboard that shows service name, hostname, live timestamp, status badge, and response time
 - `Containerized services`: separate Dockerfiles for frontend, gateway, service, and healthz
-- `Docker Compose`: local stack including Consul, services, gateway, and frontend
+- `Docker-Compose`: local stack including Consul, services, gateway, and frontend
 - `Kubernetes manifests (namespace: app)`: Deployments, Services, and Ingress for the stack
 - `Ingress routing`: / → frontend, /services and /healthz → gateway, consul.localhost/ → consul dashboard
-- `Argo CD GitOps (namespace: argocd)`: auto-sync + self-heal, ingress at http://argocd.localhost/
-- `Python scripts`: deploy.py and destroy.py for a simple cluster deployment and clean up
+- `ArgoCD GitOps (namespace: argocd)`: auto-sync + self-heal, ingress at http://argocd.localhost/
+- `Python scripts`: deploy.py and destroy.py for a local cluster deployment and clean up
 - `CI pipeline`: runs frontend Vitest and Python pytest in parallel, builds & pushes images to DockerHub
 - `Image versioning`: DockerHub image tags use `name-yyyymmdd-sha` scheme
 - `Pre-commit hook`: bandit(python), hadolint(dockerfiles), gitleaks(secrets), YAML/JSON formatting & checks

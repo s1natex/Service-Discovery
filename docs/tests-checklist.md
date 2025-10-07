@@ -3,7 +3,7 @@
 ```
 python3 ./k8s/scripts/deploy.py --install-ingress --with-argocd
 ```
-- ## Run Deploy Validation Commands:
+- ## Run Deployment Validation Commands:
 ```
 # Check Namespaces & Resources
 kubectl get ns app ingress-nginx
@@ -37,13 +37,13 @@ curl -I http://consul.localhost/
 curl -I http://argocd.localhost/
 ```
 - ## Test CI/CD process:
-#### 1) Access the ingress endpoints to see the changes to be made:
+#### 1) Access the ingress endpoints:
 - `http://localhost/` ----------- `frontend`
 - `http://localhost/services` --- `gateway`
 - `http://localhost/healthz` ---- `gateway-healthz`
 - `http://consul.localhost/` ---- `Consul UI`
 - `http://argocd.localhost/` ---- `Argo CD UI`
-#### 2) Access ArgoCD UI with Username and Password:
+#### 2) Access ArgoCD UI with the default username and password:
 ```
 # Username:
 admin
